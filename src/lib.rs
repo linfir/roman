@@ -1,15 +1,15 @@
 //! Conversion between integers and roman numerals.
 
-static ROMAN: &'static [(char, i32)] = &[
+static ROMAN: &'static [(char, u16)] = &[
     ('I', 1), ('V', 5), ('X', 10), ('L', 50), ('C', 100), ('D', 500), ('M', 1000) ];
-static ROMAN_PAIRS: &'static [(&'static str, i32)] = &[
+static ROMAN_PAIRS: &'static [(&'static str, u16)] = &[
     ("M", 1000), ("CM", 900), ("D",  500), ("CD", 400),
     ("C", 100),  ("XC", 90),  ("L",  50),  ("XL", 40),
     ("X", 10),   ("IX", 9),   ("V",  5),   ("IV", 4),
     ("I", 1) ];
 
 /// The largest number representable as a roman numeral.
-pub static MAX: i32 = 3999;
+pub static MAX: u16 = 3999;
 
 /// Converts an integer into a roman numeral.
 ///
@@ -22,8 +22,8 @@ pub static MAX: i32 = 3999;
 /// assert_eq!(x.unwrap(), "XIV");
 /// ```
 ///
-pub fn to(n: i32) -> Option<String> {
-    if n <= 0 || n > MAX { return None }
+pub fn to(n: u16) -> Option<String> {
+    if n == 0 || n > MAX { return None }
     let mut out = String::new();
     let mut n = n;
     for &(name, value) in ROMAN_PAIRS.iter() {
@@ -40,7 +40,7 @@ pub fn to(n: i32) -> Option<String> {
 fn test_to_roman() {
     let roman = "I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI XVII XVIII XIX XX XXI XXII".split(' ');
     for (i, x) in roman.enumerate() {
-        let n = (i+1) as i32;
+        let n = (i+1) as u16;
         assert_eq!(to(n).unwrap(), x);
     }
     assert_eq!(to(1984).unwrap(), "MCMLXXXIV");
@@ -57,7 +57,7 @@ fn test_to_roman() {
 /// assert_eq!(x.unwrap(), 14);
 /// ```
 ///
-pub fn from(txt: &str) -> Option<i32> {
+pub fn from(txt: &str) -> Option<u16> {
     let n = match from_lax(txt) {
         Some(n) => n,
         None    => return None
@@ -68,7 +68,7 @@ pub fn from(txt: &str) -> Option<i32> {
     }
 }
 
-fn from_lax(txt: &str) -> Option<i32> {
+fn from_lax(txt: &str) -> Option<u16> {
     let (mut n, mut max) = (0, 0);
     for c in txt.chars().rev() {
         let it = ROMAN.iter().find(|x| { let &(ch, _) = *x; ch == c } );
