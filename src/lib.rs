@@ -1,5 +1,13 @@
 //! Conversion between integers and roman numerals.
 
+#![no_std]
+
+#[cfg(test)]
+extern crate std;
+
+extern crate alloc;
+use alloc::string::String;
+
 static ROMAN: &'static [(char, u16)] = &[
     ('I', 1), ('V', 5), ('X', 10), ('L', 50), ('C', 100), ('D', 500), ('M', 1000) ];
 static ROMAN_PAIRS: &'static [(&'static str, u16)] = &[
@@ -18,10 +26,11 @@ pub static MAX: u16 = 3999;
 /// # Example
 ///
 /// ```
-/// let x = roman::to(14);
-/// assert_eq!(x.unwrap(), "XIV");
+/// assert_eq!(roman::to(14), Some("XIV".to_string()));
+/// assert_eq!(roman::to(0), None);
+/// assert_eq!(roman::to(3999), Some("MMMCMXCIX".to_string()));
+/// assert_eq!(roman::to(4000), None);
 /// ```
-///
 pub fn to(n: u16) -> Option<String> {
     if n == 0 || n > MAX { return None }
     let mut out = String::new();
@@ -32,7 +41,7 @@ pub fn to(n: u16) -> Option<String> {
             out.push_str(name);
         }
     }
-    assert!(n == 0);
+    assert_eq!(n, 0);
     Some(out)
 }
 
@@ -53,8 +62,8 @@ fn test_to_roman() {
 /// # Example
 ///
 /// ```
-/// let x = roman::from("XIV");
-/// assert_eq!(x.unwrap(), 14);
+/// assert_eq!(roman::from("XIV"), Some(14));
+/// assert_eq!(roman::from(""), None);
 /// ```
 ///
 pub fn from(txt: &str) -> Option<u16> {
@@ -72,8 +81,10 @@ fn from_lax(txt: &str) -> Option<u16> {
     let (mut n, mut max) = (0, 0);
     for c in txt.chars().rev() {
         let it = ROMAN.iter().find(|x| { let &(ch, _) = *x; ch == c } );
-        if it.is_none() { return None }
-        let &(_, val) = it.unwrap();
+        let val = match it {
+            Some(&(_, val)) => val,
+            None => return None,
+        };
         if val < max {
             n -= val;
         } else {
