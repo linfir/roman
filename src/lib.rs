@@ -1,12 +1,29 @@
-//! Conversion between integers and roman numerals.
+#![doc = include_str!("../README.md")]
 
-static ROMAN: &'static [(char, i32)] = &[
-    ('I', 1), ('V', 5), ('X', 10), ('L', 50), ('C', 100), ('D', 500), ('M', 1000) ];
-static ROMAN_PAIRS: &'static [(&'static str, i32)] = &[
-    ("M", 1000), ("CM", 900), ("D",  500), ("CD", 400),
-    ("C", 100),  ("XC", 90),  ("L",  50),  ("XL", 40),
-    ("X", 10),   ("IX", 9),   ("V",  5),   ("IV", 4),
-    ("I", 1) ];
+static ROMAN: &[(char, i32)] = &[
+    ('I', 1),
+    ('V', 5),
+    ('X', 10),
+    ('L', 50),
+    ('C', 100),
+    ('D', 500),
+    ('M', 1000),
+];
+static ROMAN_PAIRS: &[(&str, i32)] = &[
+    ("M", 1000),
+    ("CM", 900),
+    ("D", 500),
+    ("CD", 400),
+    ("C", 100),
+    ("XC", 90),
+    ("L", 50),
+    ("XL", 40),
+    ("X", 10),
+    ("IX", 9),
+    ("V", 5),
+    ("IV", 4),
+    ("I", 1),
+];
 
 /// The largest number representable as a roman numeral.
 pub static MAX: i32 = 3999;
@@ -23,7 +40,9 @@ pub static MAX: i32 = 3999;
 /// ```
 ///
 pub fn to(n: i32) -> Option<String> {
-    if n <= 0 || n > MAX { return None }
+    if n <= 0 || n > MAX {
+        return None;
+    }
     let mut out = String::new();
     let mut n = n;
     for &(name, value) in ROMAN_PAIRS.iter() {
@@ -38,9 +57,10 @@ pub fn to(n: i32) -> Option<String> {
 
 #[test]
 fn test_to_roman() {
-    let roman = "I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI XVII XVIII XIX XX XXI XXII".split(' ');
+    let roman = "I II III IV V VI VII VIII IX X XI XII XIII XIV XV XVI XVII XVIII XIX XX XXI XXII"
+        .split(' ');
     for (i, x) in roman.enumerate() {
-        let n = (i+1) as i32;
+        let n = (i + 1) as i32;
         assert_eq!(to(n).unwrap(), x);
     }
     assert_eq!(to(1984).unwrap(), "MCMLXXXIV");
@@ -58,22 +78,21 @@ fn test_to_roman() {
 /// ```
 ///
 pub fn from(txt: &str) -> Option<i32> {
-    let n = match from_lax(txt) {
-        Some(n) => n,
-        None    => return None
-    };
+    let n = from_lax(txt)?;
     match to(n) {
         Some(ref x) if *x == txt => Some(n),
-        _ => None
+        _ => None,
     }
 }
 
 fn from_lax(txt: &str) -> Option<i32> {
     let (mut n, mut max) = (0, 0);
     for c in txt.chars().rev() {
-        let it = ROMAN.iter().find(|x| { let &(ch, _) = *x; ch == c } );
-        if it.is_none() { return None }
-        let &(_, val) = it.unwrap();
+        let it = ROMAN.iter().find(|x| {
+            let &(ch, _) = *x;
+            ch == c
+        });
+        let &(_, val) = it?;
         if val < max {
             n -= val;
         } else {
