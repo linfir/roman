@@ -3,7 +3,7 @@
 [![CI](https://github.com/linfir/roman.rs/actions/workflows/ci.yml/badge.svg)](https://github.com/linfir/roman.rs/actions/workflows/ci.yml)
 [![crates.io](https://img.shields.io/crates/v/roman.svg)](https://crates.io/crates/roman)
 [![docs.rs](https://docs.rs/roman/badge.svg)](https://docs.rs/roman)
-[![license](https://img.shields.io/crates/l/roman.svg)](LICENSE)
+[![license](https://img.shields.io/crates/l/roman.svg)](https://github.com/linfir/roman.rs/blob/master/LICENSE)
 
 A Rust library to convert between integers and roman numerals.
 
@@ -13,7 +13,7 @@ Add to `Cargo.toml`:
 
 ```toml
 [dependencies]
-roman = "0.1"
+roman = "0.2"
 ```
 
 ```rust
@@ -21,6 +21,9 @@ assert_eq!(roman::to(14),        Some("XIV".to_string()));
 assert_eq!(roman::from("XIV"),   Some(14));
 assert_eq!(roman::to(0),         None);  // out of range
 assert_eq!(roman::from("XIIII"), None);  // non-canonical
+
+assert_eq!(roman::to_lower(14),      Some("xiv".to_string()));
+assert_eq!(roman::from_lower("xiv"), Some(14));
 ```
 
 Valid range: 1 to `roman::MAX` (3999).

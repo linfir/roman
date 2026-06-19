@@ -66,6 +66,24 @@ fn test_to_roman() {
     assert_eq!(to(1984).unwrap(), "MCMLXXXIV");
 }
 
+/// Converts an integer into a lowercase roman numeral.
+///
+/// Works for integer between 1 and 3999 inclusive, returns None otherwise.
+///
+/// # Example
+///
+/// ```
+/// let x = roman::to_lower(14);
+/// assert_eq!(x.unwrap(), "xiv");
+/// ```
+///
+pub fn to_lower(n: i32) -> Option<String> {
+    to(n).map(|mut s| {
+        s.make_ascii_lowercase();
+        s
+    })
+}
+
 /// Converts a roman numeral to an integer.
 ///
 /// Works for integer between 1 and 3999 inclusive, returns None otherwise.
@@ -85,9 +103,29 @@ pub fn from(txt: &str) -> Option<i32> {
     }
 }
 
+/// Converts a lowercase roman numeral to an integer.
+///
+/// Works for integer between 1 and 3999 inclusive, returns None otherwise.
+///
+/// # Example
+///
+/// ```
+/// let x = roman::from_lower("xiv");
+/// assert_eq!(x.unwrap(), 14);
+/// ```
+///
+pub fn from_lower(txt: &str) -> Option<i32> {
+    let n = from_lax(txt)?;
+    match to_lower(n) {
+        Some(ref x) if *x == txt => Some(n),
+        _ => None,
+    }
+}
+
 fn from_lax(txt: &str) -> Option<i32> {
     let (mut n, mut max) = (0, 0);
     for c in txt.chars().rev() {
+        let c = c.to_ascii_uppercase();
         let it = ROMAN.iter().find(|x| {
             let &(ch, _) = *x;
             ch == c
@@ -112,5 +150,18 @@ fn test_from() {
 fn test_to_from() {
     for n in 1..MAX {
         assert_eq!(from(&to(n).unwrap()).unwrap(), n);
+    }
+}
+
+#[test]
+fn test_from_lower() {
+    assert!(from_lower("I").is_none());
+    assert_eq!(from_lower("xiv").unwrap(), 14);
+}
+
+#[test]
+fn test_to_lower_from_lower() {
+    for n in 1..MAX {
+        assert_eq!(from_lower(&to_lower(n).unwrap()).unwrap(), n);
     }
 }
