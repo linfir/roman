@@ -122,7 +122,16 @@ pub fn from_lower(txt: &str) -> Option<i32> {
     }
 }
 
+/// The longest valid roman literal (3888, MMMDCCCLXXXVIII) has 15
+/// characters, so any longer input cannot be a valid numeral and is rejected
+/// before the accumulator can grow past the range of `i32`.
+const MAX_LEN: usize = 15;
+
 fn from_lax(txt: &str) -> Option<i32> {
+    if txt.len() > MAX_LEN {
+        return None;
+    }
+
     let (mut n, mut max) = (0, 0);
     for c in txt.chars().rev() {
         let c = c.to_ascii_uppercase();
@@ -164,4 +173,23 @@ fn test_to_lower_from_lower() {
     for n in 1..MAX {
         assert_eq!(from_lower(&to_lower(n).unwrap()).unwrap(), n);
     }
+}
+
+#[test]
+fn test_from_lax_rejects_input_longer_than_max_literal() {
+    // 15 chars is the longest literal `to()` produces (3888); one more is
+    // rejected without ever touching the accumulator.
+    let longest = to(3888).unwrap();
+    assert_eq!(longest.len(), MAX_LEN);
+    assert_eq!(from(&longest).unwrap(), 3888);
+    assert!(from(&"M".repeat(16)).is_none());
+}
+
+#[test]
+fn test_from_lax_long_input_does_not_overflow() {
+    // Never a valid numeral: 2_147_484 `M`s are worth more than i32::MAX, so
+    // this must come back as None rather than panicking or wrapping.
+    let input = "M".repeat(2_147_484);
+    assert!(from(&input).is_none());
+    assert!(from_lax(&input).is_none());
 }
